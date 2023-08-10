@@ -1,40 +1,41 @@
 #!/bin/bash
 
-######################################################################################################
-##
-## Examples: 
-## 		$ ./vidmerge.sh .
-##		$ ./vidmerge.sh ./Test
-##
-## REFERENCE: Go to https://trac.ffmpeg.org/wiki/Concatenate and section "Using intermediate files"
-##
-######################################################################################################
-
 if [[ ! -d $1 ]]; then
 	echo "[ERR] Video location is not provided or does not exit!"
 	exit 1
 fi
-echo "[WARN] This script will replace spaces with underscores in the names of the original videos."
+
+cd "$1" && echo "[DEB] Changed directory to $1"
 
 concat=""
-
-cd $1 && echo "[DEB] Changed directory to $1"
-
-for srcfile in $(find . -maxdepth 1 -type f -name "*.mp4" -printf "%P\n" | sort -V); do
+newnames=()
+for srcfile in *.mp4; do
+	echo "[DEB] srcfile: $srcfile"
+	
 	## Remove spaces from the names of source videos 
 	## to avoid error when running ffmpeg command
 	newname=$( echo "$srcfile" | tr " " "_" )
-	mv "$srcfile" "$newname"
+	mv "$srcfile" "$newname" && newnames+=("$newname")
 	
-	
+	## Go to https://trac.ffmpeg.org/wiki/Concatenate then section "Using intermediate files"
 	ffmpeg -i $newname -c copy -bsf:v h264_mp4toannexb "$newname.ts"
 	
 	concat+="$newname.ts|"
+	
+	newnames+=("$newname")
 done
 
-## Start merging here
+## Start merging videos here
 outputname="mergedvideos-$(date +%s).mp4"
 ffmpeg -i "concat:$concat" -c copy -bsf:a aac_adtstoasc "$outputname"
 
+## Rename the source videos back to their original ones
+echo "[DEB] newnames: ${newnames[@]}"
+for newname in ${newnames[@]}; do 
+	originalname=$(echo $newname | tr "_" " ")
+	mv "$newname" "$originalname"
+done
+
+## Remove intermeditate files
 rm *.mp4.ts
 
