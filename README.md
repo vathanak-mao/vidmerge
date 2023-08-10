@@ -9,6 +9,6 @@ sudo apt install ffmpeg
 ## How-to
 For example:
 ```
-$ ./vidmerge.sh ~/Downloads/myvideos
+$ ./vidmerge.sh ~/Downloads/myvideos/
 ```
 Then, the output file will be created in the video directory.
