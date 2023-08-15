@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#echo "Implement option --sort"
+#exit 1
+
 if [[ ! -d $1 ]]; then
 	echo "[ERR] Video location is not provided or does not exit!"
 	exit 1
@@ -7,22 +10,27 @@ fi
 
 cd "$1" && echo "[DEB] Changed directory to $1"
 
+filenames=$(find . -mindepth 1 -maxdepth 1 -type f -name '*.mp4' -printf '%P\n' | sort -V | tr "\n" ":") 
+echo "[DEB] filenames: $filenames"
+
+IFS=":" read -a srcfiles <<< "$filenames" 
+
 concat=""
 newnames=()
-for srcfile in *.mp4; do
+for srcfile in "${srcfiles[@]}"; do
 	echo "[DEB] srcfile: $srcfile"
 	
 	## Remove spaces from the names of source videos 
 	## to avoid error when running ffmpeg command
-	newname=$( echo "$srcfile" | tr " " "_" )
-	mv "$srcfile" "$newname" && newnames+=("$newname")
+	tmpname=$( echo "$srcfile" | tr " " "_" )
+	mv "$srcfile" "$tmpname" && newnames+=("$tmpname")
 	
 	## Go to https://trac.ffmpeg.org/wiki/Concatenate then section "Using intermediate files"
-	ffmpeg -i $newname -c copy -bsf:v h264_mp4toannexb "$newname.ts"
+	ffmpeg -i $tmpname -c copy -bsf:v h264_mp4toannexb "$tmpname.ts"
 	
-	concat+="$newname.ts|"
+	concat+="$tmpname.ts|"
 	
-	newnames+=("$newname")
+	#newnames+=("$tmpname")
 done
 
 ## Start merging videos here
