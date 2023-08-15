@@ -26,7 +26,8 @@ for srcfile in "${srcfiles[@]}"; do
 	mv "$srcfile" "$tmpname" && newnames+=("$tmpname")
 	
 	## Go to https://trac.ffmpeg.org/wiki/Concatenate then section "Using intermediate files"
-	ffmpeg -i $tmpname -c copy -bsf:v h264_mp4toannexb "$tmpname.ts"
+	## For "-c:v" option, go to https://ffmpeg.org/ffmpeg.html#Stream-selection
+	ffmpeg -i $tmpname -c:v copy -bsf:v h264_mp4toannexb "$tmpname.ts"
 	
 	concat+="$tmpname.ts|"
 	
@@ -35,7 +36,7 @@ done
 
 ## Start merging videos here
 outputname="mergedvideos-$(date +%s).mp4"
-ffmpeg -i "concat:$concat" -c copy -bsf:a aac_adtstoasc "$outputname"
+ffmpeg -i "concat:$concat" -c:v copy -bsf:a aac_adtstoasc "$outputname"
 
 ## Rename the source videos back to their original ones
 echo "[DEB] newnames: ${newnames[@]}"
