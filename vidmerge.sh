@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#echo "Implement option --sort"
-#exit 1
-
 if [[ ! -d $1 ]]; then
 	echo "[ERR] Video location is not provided or does not exit!"
 	exit 1
