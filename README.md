@@ -1,5 +1,5 @@
 # vidmerge
-Merge **only MP4 files** in a directory together
+Sort by name then merge **only MP4 files** in a directory together.
 
 ## Prerequisites
 This script uses `ffmpeg` to merge video files. To install it, run:
@@ -11,4 +11,4 @@ For example:
 ```
 $ ./vidmerge.sh ~/Downloads/myvideos/
 ```
-Then, the output file will be created in the video directory.
+Then, the output file will be created in the directory of the video files.
