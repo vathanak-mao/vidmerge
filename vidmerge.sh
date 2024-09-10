@@ -8,7 +8,10 @@ fi
 cd "$1" && echo "[DEB] Changed directory to $1"
 
 #filenames=$(find . -mindepth 1 -maxdepth 1 -type f -name '*.mp4' -printf '%P\n' | sort -V | tr "\n" ":")
+
 filenames=$(ls -1rt *.mp4 | sed 's/^"//g;s/"$//g' | tr "\n" ":") 
+## Any filenames containing a space are enclosed with single quote so the 'sed' command will remove them
+
 echo "[DEB] filenames: $filenames"
 
 IFS=":" read -a srcfiles <<< "$filenames" 
