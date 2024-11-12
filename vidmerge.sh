@@ -29,9 +29,10 @@ for srcfile in "${srcfiles[@]}"; do
 	tmp=$srcfile
 	
 	## if contains spacial characters, make a copy with a new name
-	if [[ "$srcfile" =~ [^a-zA-Z0-9_\(\)\-] ]]; then
+	if [[ "$srcfile" =~ [^a-zA-Z0-9\_\(\)\-] ]]; then
+	  echo "\n=================================\n"
 	  tmp=$(date +%N)
-	  cp $srcfile $tmp
+	  cp "$srcfile" $tmp
 	  tmpfilenames+=("$tmp")
 	fi
 	
