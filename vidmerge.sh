@@ -7,6 +7,8 @@ fi
 
 cd "$1" && echo "[DEB] Changed directory to $1"
 
+outputfilename=$1
+
 #filenames=$(find . -mindepth 1 -maxdepth 1 -type f -name '*.mp4' -printf '%P\n' | sort -V | tr "\n" ":")
 
 filenames=$(ls -1rt *.mp4 | sed 's/^"//g;s/"$//g' | tr "\n" ":") 
@@ -54,7 +56,7 @@ for srcfile in "${srcfiles[@]}"; do
 done
 
 ## Start merging videos here
-outputname="mergedvideos-$(date +%s).mp4"
+outputname="$outputfilename.mp4"
 ffmpeg -i "concat:$concat" -c:v copy -bsf:a aac_adtstoasc "$outputname"
 
 
