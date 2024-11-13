@@ -20,7 +20,7 @@ IFS=":" read -a srcfiles <<< "$filenames"
 ## ----------------------------------------------------------------
 
 concat=""
-newnames=()
+nospace_names=()
 tmpfilenames=()
 
 for srcfile in "${srcfiles[@]}"; do
@@ -28,12 +28,22 @@ for srcfile in "${srcfiles[@]}"; do
 	
 	tmp=$srcfile
 	
-	## if contains spacial characters, make a copy with a new name
-	if [[ "$srcfile" =~ [^a-zA-Z0-9\s\_\(\)\-\.] ]]; then
-	  echo "\n=================================\n"
-	  tmp=$(date +%N)
-	  cp -v "$srcfile" $tmp
-	  tmpfilenames+=("$tmp")
+	## ffmpeg does not work when source file's name 
+	## conains whitespace or special characters (e.g. japanese alphabet)
+	
+	if [[ "$srcfile" =~ [^a-zA-Z0-9\ \_\(\)\-\.] ]]; then  
+		## if contains spacial characters, make a copy of source file with simple name 
+		## and let ffmpeg work on the copy instead
+		tmp=$(date +%N)
+		cp -v "$srcfile" $tmp
+		tmpfilenames+=("$tmp") 
+	elif [[ "$srcfile" =~ [\ ] ]]; then  
+		## if contains whitespace, just rename the source file instead of making a copy
+	  	## so this script won't eat too much disk space,
+	  	## and it's easy to rename them back.
+		tmp=$(echo "$srcfile" | tr " " "_") 
+		mv "$srcfile" "$tmp"
+		nospace_names+=("$tmp")
 	fi
 	
 	## Go to https://trac.ffmpeg.org/wiki/Concatenate then section "Using intermediate files"
@@ -50,12 +60,18 @@ ffmpeg -i "concat:$concat" -c:v copy -bsf:a aac_adtstoasc "$outputname"
 
 ## ----------------------------------------------------------------
 
-## Remove temporary files
+## Remove the copies of source files
 echo "[DEB] Temp files: ${tmpfilenames[@]}"
 for f in ${tmpfilenames[@]}; do 
 	rm $f
 done
 
+## Renamed source files back
+echo "[DEB] Renamed files: ${nospace_names[@]}"
+for f in ${nospace_names[@]}; do 
+	originalname=$(echo $f | tr "_" " ")
+	mv "$f" "$originalname"
+done
 
 ## Remove intermeditate files
 rm *.ts
